@@ -6,16 +6,20 @@ const public_users = express.Router();
 
 
 public_users.post("/register", (req,res) => {
- // Push a new user object into the users array based on query parameters from the request
+    console.log("Username: " + req.query.username)
+ // Check if the users array is empty or if the username already exists
+ if (users.length === 0 || !users.some(user => user.username === req.query.username)) {
+    // Push a new user object into the users array
     users.push({
-        "firstName": req.query.firstName,
-        "lastName": req.query.lastName,
-        "email": req.query.email,
-        "DOB": req.query.DOB,
-        "pwd":req.query.pwd
+        "username": req.query.username,
+        "password": req.query.password // Ensure you're passing 'password' in the query
     });
-    // Send a success message as the response, indicating the user has been added
-    res.send("The user " + req.query.firstName + " has been added!");
+    // Send a success message as the response
+    return res.send("The user " + req.query.username + " has been added!");
+} else {
+    // Send a message if the username already exists
+    return res.send("The username: " + req.query.username + " already exists");
+}
 });
 
 // Get the book list available in the shop
