@@ -6,19 +6,19 @@ const public_users = express.Router();
 
 
 public_users.post("/register", (req,res) => {
-    console.log("Username: " + req.query.username)
+    console.log("Username: " + req.body.username)
  // Check if the users array is empty or if the username already exists
- if (users.length === 0 || !users.some(user => user.username === req.query.username)) {
+ if (users.length === 0 || !users.some(user => user.username === req.body.username)) {
     // Push a new user object into the users array
     users.push({
-        "username": req.query.username,
-        "password": req.query.password // Ensure you're passing 'password' in the query
+        "username": req.body.username,
+        "password": req.body.password // Ensure you're passing 'password' in the query
     });
     // Send a success message as the response
-    return res.send("The user " + req.query.username + " has been added!");
+    return res.send("The user " + req.body.username + " has been registered successfully. Now you can login.");
 } else {
     // Send a message if the username already exists
-    return res.send("The username: " + req.query.username + " already exists");
+    return res.send("The username: " + req.body.username + " already exists");
 }
 });
 
@@ -43,26 +43,28 @@ public_users.get('/isbn/:isbn',function (req, res) {
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
     let authorToMatch = req.params.author;
-    console.log(authorToMatch)
-    for (let book of Object.values(books)) {
-        console.log(book)
-        if (book.author === authorToMatch) {
-            return res.status(200).json(book);
-        }
+    // Collect all books by the author
+    let booksByAuthor = Object.values(books).filter(book => book.author === authorToMatch);
+    
+    if (booksByAuthor.length > 0) {
+        return res.status(200).json(booksByAuthor);  // Return all matching books
+    } else {
+        return res.status(404).json({ message: "No books found by this author" });
     }
-
-    return res.status(404).json({message: "Book by this author not found"});
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
     let titleToMatch = req.params.title;
-    for (let book of Object.values(books)) {
-        if (book.title === titleToMatch) {
-            return res.status(200).json(book);
-        }
+    // Collect all books that match the title
+    let booksByTitle = Object.values(books).filter(book => book.title === titleToMatch);
+    if (booksByTitle.length > 0) {
+        console.log(`Found ${booksByTitle.length} book(s) with the title: ${titleToMatch}`);
+        return res.status(200).json(booksByTitle);  // Return all matching books
+    } else {
+        console.log(`No books found with the title: ${titleToMatch}`);
+        return res.status(404).json({ message: "No books found with this title" });
     }
-    return res.status(404).json({message: "Book by this author not found"});
 });
 
 //  Get book review
